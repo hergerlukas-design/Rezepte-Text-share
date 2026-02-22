@@ -33,6 +33,9 @@
         details { background: var(--card); border-radius: 16px; margin-bottom: 15px; border: 1px solid #e5dfcc; overflow: hidden; }
         summary { padding: 20px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
         .recipe-content { padding: 20px; border-top: 1px solid #e5dfcc; background: rgba(255,255,255,0.3); }
+        .ingredient-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+
+.ingredient-item input[type="checkbox"] { margin: 0; width: 18px; height: 18px; flex-shrink: 0; /* Verhindert, dass die Checkbox gequetscht wird */}
 
         /* Floating Menu Logik */
         .fab-container { position: fixed; bottom: 30px; right: 25px; display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 100; }
@@ -147,7 +150,7 @@
             const list = document.getElementById('recipe-list');
             list.innerHTML = recipes.length ? "" : "<p style='text-align:center; opacity:0.5; margin-top:40px;'>Noch keine Rezepte...</p>";
             recipes.forEach((r, i) => {
-                const ings = r.ingredients.split('\n').filter(t => t.trim()).map(t => `<div style="margin-bottom:8px"><input type="checkbox"> ${t}</div>`).join('');
+                const ings = r.ingredients.split('\n').filter(t => t.trim()).map(t => `<label class="ingredient-item"><input type="checkbox"> <span>${t}</span></label>`).join('');
                 list.innerHTML += `
                     <details>
                         <summary>${r.title}</summary>
