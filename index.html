@@ -59,6 +59,15 @@
         .import-section h3 { margin-top: 0; font-size: 1rem; }
 
         /* Editor Overlay */
+        #editor-overlay h2 { 
+    margin-top: 0; 
+    color: var(--text);
+}
+
+#importCode {
+    border-style: dashed; /* Macht das Importfeld optisch unterscheidbar */
+    background: #fff;
+}
         #editor-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 30; display: none; overflow-y: auto; padding: 45px 20px; box-sizing: border-box; }
         input, textarea { width: 100%; margin-bottom: 15px; padding: 14px; border: 1px solid #e5dfcc; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; }
         .save-btn { background: var(--primary); color: white; width: 100%; padding: 16px; font-size: 18px; border-radius: 12px; border: none; margin-top: 10px; }
@@ -84,15 +93,25 @@
 
     <button class="fab" onclick="openEditor()">+</button>
 
-    <div id="editor-overlay">
-        <button class="close-btn" onclick="closeEditor()">✕ Abbrechen</button>
-        <h2 id="form-title">Neues Rezept</h2>
-        <input type="hidden" id="edit-index">
-        <input type="text" id="title" placeholder="Titel">
-        <textarea id="ingredients" rows="6" placeholder="Zutaten (eine pro Zeile)"></textarea>
-        <textarea id="instructions" rows="10" placeholder="Zubereitung..."></textarea>
-        <button class="save-btn" onclick="saveRecipe()">Speichern</button>
+  <div id="editor-overlay">
+    <button class="close-btn" onclick="closeEditor()">✕ Abbrechen</button>
+    
+    <h2 id="form-title">Neues Rezept</h2>
+    <input type="hidden" id="edit-index">
+    <input type="text" id="title" placeholder="Titel">
+    <textarea id="ingredients" rows="6" placeholder="Zutaten (eine pro Zeile)"></textarea>
+    <textarea id="instructions" rows="8" placeholder="Zubereitung..."></textarea>
+    <button class="save-btn" onclick="saveRecipe()">Speichern</button>
+
+    <div style="margin: 30px 0; border-top: 1px solid #e5dfcc; position: relative;">
+        <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--bg); padding: 0 10px; color: #b5af9a; font-size: 14px;">ODER</span>
     </div>
+
+    <h2 style="font-size: 1.2rem;">Rezept-Code importieren</h2>
+    <p style="font-size: 0.9rem; color: #888; margin-top: -10px;">Falls dir jemand ein Rezept geschickt hat:</p>
+    <input type="text" id="importCode" placeholder="Code hier einfügen...">
+    <button class="share-btn" onclick="importRecipe()" style="width: 100%; padding: 12px;">Code hinzufügen</button>
+</div>
 
     <script>
         let recipes = JSON.parse(localStorage.getItem('myRecipes')) || [];
@@ -149,21 +168,24 @@
         }
 
         // --- NEU: IMPORT FUNKTION ---
-        function importRecipe() {
-            const code = document.getElementById('importCode').value.trim();
-            if (!code) return;
-            try {
-                const decoded = JSON.parse(decodeURIComponent(escape(atob(code))));
-                recipes.push(decoded);
-                localStorage.setItem('myRecipes', JSON.stringify(recipes));
-                document.getElementById('importCode').value = "";
-                renderRecipes();
-                alert("Rezept erfolgreich hinzugefügt!");
-            } catch (e) {
-                alert("Ungültiger Code. Bitte prüfe den Text.");
-            }
-        }
-
+    function importRecipe() {
+    const code = document.getElementById('importCode').value.trim();
+    if (!code) return;
+    try {
+        const decoded = JSON.parse(decodeURIComponent(escape(atob(code))));
+        recipes.push(decoded);
+        localStorage.setItem('myRecipes', JSON.stringify(recipes));
+        
+        // Felder leeren und Overlay schließen
+        document.getElementById('importCode').value = "";
+        closeEditor(); 
+        renderRecipes();
+        
+        alert("Rezept erfolgreich importiert! ✨");
+    } catch (e) {
+        alert("Der Code ist leider nicht gültig.");
+    }
+}
         function deleteRecipe(index) {
             if(confirm("Löschen?")) {
                 recipes.splice(index, 1);
