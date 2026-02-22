@@ -9,23 +9,18 @@
     <style>
         :root { 
             --primary: #84a59d;    /* Salbeigrün */
-            --secondary: #9a8c98;  /* Mauve/Grau */
             --bg: #faf9f6;         /* Off-White */
             --card: #F3EFE0;       /* Soft Clay */
             --text: #433e3a;       /* Anthrazit-Braun */
             --accent: #e07a5f;     /* Terrakotta */
         }
 
-        body { font-family: -apple-system, system-ui, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        body { font-family: -apple-system, system-ui, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; overflow-x: hidden; }
         
         header { 
-            background: var(--bg); 
-            padding: 45px 20px 20px 20px; 
-            position: sticky; top: 0; z-index: 10; 
-            border-bottom: 1px solid #e5dfcc; 
+            background: var(--bg); padding: 45px 20px 20px 20px; 
+            position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #e5dfcc; 
         }
-
-        h1 { font-size: 1.6rem; margin: 0 0 15px 0; text-align: center; }
 
         #searchBar { 
             width: 100%; padding: 14px; border: 1px solid #e5dfcc; border-radius: 12px; 
@@ -34,106 +29,82 @@
 
         .container { padding: 20px; padding-bottom: 120px; }
         
-        details { background: var(--card); border-radius: 16px; margin-bottom: 15px; border: 1px solid #e5dfcc; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        /* Rezept Karten */
+        details { background: var(--card); border-radius: 16px; margin-bottom: 15px; border: 1px solid #e5dfcc; overflow: hidden; }
         summary { padding: 20px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-        summary::after { content: '❯'; font-size: 0.8em; color: #b5af9a; transition: 0.3s; }
-        details[open] summary::after { transform: rotate(90deg); color: var(--primary); }
+        .recipe-content { padding: 20px; border-top: 1px solid #e5dfcc; background: rgba(255,255,255,0.3); }
+
+        /* Floating Menu Logik */
+        .fab-container { position: fixed; bottom: 30px; right: 25px; display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 100; }
+        .fab-sub { width: 50px; height: 50px; background: white; color: var(--text); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #e5dfcc; transition: 0.3s; }
+        .fab-main { width: 65px; height: 65px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; border: none; box-shadow: 0 8px 20px rgba(132, 165, 157, 0.4); transition: 0.3s; }
         
-        .recipe-content { padding: 20px; border-top: 1px solid #e5dfcc; line-height: 1.6; background: rgba(255,255,255,0.3); }
-        
-        .ingredient-item { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-        input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); }
+        .fab-container.open .fab-sub { display: flex; animation: slideUp 0.3s ease-out; }
+        .fab-container.open .fab-main { transform: rotate(45deg); background: var(--accent); }
 
-        /* Buttons */
-        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
-        button { border: none; padding: 10px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; flex-grow: 1; }
-        
-        .edit-btn { background: #eef4ff; color: #4a90e2; border: 1px solid #d0e0f5; }
-        .share-btn { background: #f0fdf4; color: #2d6a4f; border: 1px solid #d1fae5; }
-        .delete-btn { background: #fff5f5; color: var(--accent); border: 1px solid #fee2e2; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .fab { position: fixed; bottom: 30px; right: 25px; width: 65px; height: 65px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; border: none; box-shadow: 0 8px 20px rgba(132, 165, 157, 0.4); z-index: 20; }
+        /* Overlays */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 200; display: none; overflow-y: auto; padding: 45px 20px; box-sizing: border-box; }
+        input, textarea { width: 100%; margin-bottom: 15px; padding: 14px; border: 1px solid #e5dfcc; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
+        .save-btn { background: var(--primary); color: white; width: 100%; padding: 16px; font-size: 18px; border-radius: 12px; border: none; }
+        .close-btn { background: none; border: none; color: var(--text); font-size: 16px; margin-bottom: 20px; cursor: pointer; }
 
-        /* Import Bereich */
-        .import-section { margin-top: 40px; padding: 20px; border: 2px dashed #e5dfcc; border-radius: 16px; text-align: center; }
-        .import-section h3 { margin-top: 0; font-size: 1rem; }
-
-        /* Editor Overlay */
-        #editor-overlay h2 { 
-    margin-top: 0; 
-    color: var(--text);
-}
-
-#importCode {
-    border-style: dashed; /* Macht das Importfeld optisch unterscheidbar */
-    background: #fff;
-}
-        #editor-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 30; display: none; overflow-y: auto; padding: 45px 20px; box-sizing: border-box; }
-        input, textarea { width: 100%; margin-bottom: 15px; padding: 14px; border: 1px solid #e5dfcc; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; }
-        .save-btn { background: var(--primary); color: white; width: 100%; padding: 16px; font-size: 18px; border-radius: 12px; border: none; margin-top: 10px; }
-        .close-btn { background: none; color: var(--text); font-size: 16px; margin-bottom: 20px; text-align: left; padding: 0; width: auto; }
+        /* Buttons in Rezepten */
+        .btn-group { display: flex; gap: 8px; margin-top: 20px; }
+        .btn-group button { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #e5dfcc; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Meine Rezepte 🍳</h1>
-        <input type="text" id="searchBar" placeholder="Gericht suchen..." onkeyup="filterRecipes()">
+        <input type="text" id="searchBar" placeholder="Suchen..." onkeyup="filterRecipes()">
     </header>
 
-    <div class="container">
-        <div id="recipe-list"></div>
+    <div class="container" id="recipe-list"></div>
 
+    <div class="fab-container" id="fabContainer">
+        <button class="fab-sub" onclick="openOverlay('editor-overlay')" title="Neu schreiben">✍️</button>
+        <button class="fab-sub" onclick="openOverlay('import-overlay')" title="Code einfügen">📥</button>
+        <button class="fab-main" onclick="toggleFab()">+</button>
     </div>
 
-    <button class="fab" onclick="openEditor()">+</button>
-
-  <div id="editor-overlay">
-    <button class="close-btn" onclick="closeEditor()">✕ Abbrechen</button>
-    
-    <h2 id="form-title">Neues Rezept</h2>
-    <input type="hidden" id="edit-index">
-    <input type="text" id="title" placeholder="Titel">
-    <textarea id="ingredients" rows="6" placeholder="Zutaten (eine pro Zeile)"></textarea>
-    <textarea id="instructions" rows="8" placeholder="Zubereitung..."></textarea>
-    <button class="save-btn" onclick="saveRecipe()">Speichern</button>
-
-    <div style="margin: 30px 0; border-top: 1px solid #e5dfcc; position: relative;">
-        <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--bg); padding: 0 10px; color: #b5af9a; font-size: 14px;">ODER</span>
+    <div id="editor-overlay" class="overlay">
+        <button class="close-btn" onclick="closeAllOverlays()">✕ Abbrechen</button>
+        <h2 id="form-title">Neues Rezept</h2>
+        <input type="hidden" id="edit-index">
+        <input type="text" id="title" placeholder="Titel">
+        <textarea id="ingredients" rows="6" placeholder="Zutaten (eine pro Zeile)"></textarea>
+        <textarea id="instructions" rows="8" placeholder="Zubereitung..."></textarea>
+        <button class="save-btn" onclick="saveRecipe()">Speichern</button>
     </div>
 
-    <h2 style="font-size: 1.2rem;">Rezept-Code importieren</h2>
-    <p style="font-size: 0.9rem; color: #888; margin-top: -10px;">Falls dir jemand ein Rezept geschickt hat:</p>
-    <input type="text" id="importCode" placeholder="Code hier einfügen...">
-    <button class="share-btn" onclick="importRecipe()" style="width: 100%; padding: 12px;">Code hinzufügen</button>
-</div>
+    <div id="import-overlay" class="overlay">
+        <button class="close-btn" onclick="closeAllOverlays()">✕ Abbrechen</button>
+        <h2>Rezept importieren</h2>
+        <p>Füge hier den Code ein, den du erhalten hast:</p>
+        <input type="text" id="importCode" placeholder="Code hier einfügen..." style="border-style: dashed;">
+        <button class="save-btn" onclick="importRecipe()">Hinzufügen</button>
+    </div>
 
     <script>
         let recipes = JSON.parse(localStorage.getItem('myRecipes')) || [];
 
-        function renderRecipes() {
-            const list = document.getElementById('recipe-list');
-            list.innerHTML = "";
-            recipes.forEach((recipe, index) => {
-                const ingredientList = recipe.ingredients.split('\n').filter(i => i.trim() !== "").map(ing => `
-                    <label class="ingredient-item"><input type="checkbox"> <span>${ing}</span></label>
-                `).join('');
+        function toggleFab() {
+            document.getElementById('fabContainer').classList.toggle('open');
+        }
 
-                list.innerHTML += `
-                    <details class="recipe-item">
-                        <summary>${recipe.title}</summary>
-                        <div class="recipe-content">
-                            <strong>Zutaten:</strong><br>${ingredientList}<hr style="border:0; border-top:1px solid #e5dfcc; margin:15px 0;">
-                            <strong>Zubereitung:</strong><p>${recipe.instructions.replace(/\n/g, '<br>')}</p>
-                            <div class="btn-group">
-                                <button class="edit-btn" onclick="openEditor(${index})">Bearbeiten</button>
-                                <button class="share-btn" onclick="shareRecipe(${index})">Teilen</button>
-                                <button class="delete-btn" onclick="deleteRecipe(${index})">Löschen</button>
-                            </div>
-                        </div>
-                    </details>
-                `;
-            });
+        function openOverlay(id) {
+            closeAllOverlays();
+            document.getElementById(id).style.display = 'block';
+            toggleFab(); // Menü wieder einklappen
+        }
+
+        function closeAllOverlays() {
+            document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
+            document.getElementById('edit-index').value = "";
+            document.getElementById('form-title').innerText = "Neues Rezept";
         }
 
         function saveRecipe() {
@@ -143,73 +114,71 @@
             const editIndex = document.getElementById('edit-index').value;
 
             if (!title) return;
-            const newRecipe = { title, ingredients, instructions };
+            const recipe = { title, ingredients, instructions };
 
-            if (editIndex === "") recipes.push(newRecipe);
-            else recipes[editIndex] = newRecipe;
+            if (editIndex === "") recipes.push(recipe);
+            else recipes[editIndex] = recipe;
 
             localStorage.setItem('myRecipes', JSON.stringify(recipes));
-            closeEditor();
+            closeAllOverlays();
             renderRecipes();
         }
 
-        // --- NEU: TEILEN FUNKTION ---
         function shareRecipe(index) {
-            const recipe = recipes[index];
-            const code = btoa(unescape(encodeURIComponent(JSON.stringify(recipe)))); // Erstellt einen kompakten Code
-            navigator.clipboard.writeText(code).then(() => {
-                alert("Rezept-Code wurde kopiert! Schicke ihn jetzt per WhatsApp an deine Freunde.");
+            const code = btoa(unescape(encodeURIComponent(JSON.stringify(recipes[index]))));
+            navigator.clipboard.writeText(code).then(() => alert("Code kopiert!"));
+        }
+
+        function importRecipe() {
+            const code = document.getElementById('importCode').value.trim();
+            try {
+                const decoded = JSON.parse(decodeURIComponent(escape(atob(code))));
+                recipes.push(decoded);
+                localStorage.setItem('myRecipes', JSON.stringify(recipes));
+                document.getElementById('importCode').value = "";
+                closeAllOverlays();
+                renderRecipes();
+            } catch (e) { alert("Ungültiger Code"); }
+        }
+
+        function renderRecipes() {
+            const list = document.getElementById('recipe-list');
+            list.innerHTML = recipes.length ? "" : "<p style='text-align:center; opacity:0.5; margin-top:40px;'>Noch keine Rezepte...</p>";
+            recipes.forEach((r, i) => {
+                const ings = r.ingredients.split('\n').filter(t => t.trim()).map(t => `<div style="margin-bottom:8px"><input type="checkbox"> ${t}</div>`).join('');
+                list.innerHTML += `
+                    <details>
+                        <summary>${r.title}</summary>
+                        <div class="recipe-content">
+                            <strong>Zutaten:</strong><br>${ings}<hr style="border:0; border-top:1px solid #e5dfcc; margin:15px 0;">
+                            <strong>Zubereitung:</strong><p>${r.instructions.replace(/\n/g, '<br>')}</p>
+                            <div class="btn-group">
+                                <button onclick="openEdit(${i})">Bearbeiten</button>
+                                <button onclick="shareRecipe(${i})">Teilen</button>
+                                <button onclick="deleteRecipe(${i})" style="color:var(--accent)">Löschen</button>
+                            </div>
+                        </div>
+                    </details>`;
             });
         }
 
-        // --- NEU: IMPORT FUNKTION ---
-    function importRecipe() {
-    const code = document.getElementById('importCode').value.trim();
-    if (!code) return;
-    try {
-        const decoded = JSON.parse(decodeURIComponent(escape(atob(code))));
-        recipes.push(decoded);
-        localStorage.setItem('myRecipes', JSON.stringify(recipes));
-        
-        // Felder leeren und Overlay schließen
-        document.getElementById('importCode').value = "";
-        closeEditor(); 
-        renderRecipes();
-        
-        alert("Rezept erfolgreich importiert! ✨");
-    } catch (e) {
-        alert("Der Code ist leider nicht gültig.");
-    }
-}
-        function deleteRecipe(index) {
-            if(confirm("Löschen?")) {
-                recipes.splice(index, 1);
-                localStorage.setItem('myRecipes', JSON.stringify(recipes));
-                renderRecipes();
-            }
-        }
-
-        function openEditor(index = null) {
+        function openEdit(i) {
+            document.getElementById('title').value = recipes[i].title;
+            document.getElementById('ingredients').value = recipes[i].ingredients;
+            document.getElementById('instructions').value = recipes[i].instructions;
+            document.getElementById('edit-index').value = i;
+            document.getElementById('form-title').innerText = "Rezept bearbeiten";
             document.getElementById('editor-overlay').style.display = 'block';
-            if (index !== null) {
-                document.getElementById('title').value = recipes[index].title;
-                document.getElementById('ingredients').value = recipes[index].ingredients;
-                document.getElementById('instructions').value = recipes[index].instructions;
-                document.getElementById('edit-index').value = index;
-            } else {
-                document.getElementById('title').value = "";
-                document.getElementById('ingredients').value = "";
-                document.getElementById('instructions').value = "";
-                document.getElementById('edit-index').value = "";
-            }
         }
 
-        function closeEditor() { document.getElementById('editor-overlay').style.display = 'none'; }
+        function deleteRecipe(i) {
+            if(confirm("Löschen?")) { recipes.splice(i,1); localStorage.setItem('myRecipes', JSON.stringify(recipes)); renderRecipes(); }
+        }
+
         function filterRecipes() {
             const term = document.getElementById('searchBar').value.toLowerCase();
-            document.querySelectorAll('.recipe-item').forEach(item => {
-                const title = item.querySelector('summary').innerText.toLowerCase();
-                item.style.display = title.includes(term) ? "block" : "none";
+            document.querySelectorAll('details').forEach(d => {
+                d.style.display = d.querySelector('summary').innerText.toLowerCase().includes(term) ? "block" : "none";
             });
         }
 
